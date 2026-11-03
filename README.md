@@ -6,7 +6,7 @@ Windows / Linux 用の Neovim 個人設定。プラグイン管理は [lazy.nvim
 
 | ツール | 用途 | Windows | Linux（Debian / Ubuntu の例） |
 |---|---|---|---|
-| Neovim 0.12 以上 | nvim-treesitter（main ブランチ）の要件 | `winget install Neovim.Neovim` | 公式の AppImage / tarball など（※） |
+| Neovim 0.12 以上 | nvim-treesitter（main ブランチ）の要件 | `winget install Neovim.Neovim` | 公式の tarball（[下記](#linux-に-neovim-をインストールする)） |
 | git | lazy.nvim とプラグインの取得 | `winget install Git.Git` | `sudo apt install git` |
 | tree-sitter-cli | Tree-sitter パーサーのビルド | `npm install -g tree-sitter-cli` | `npm install -g tree-sitter-cli` または `cargo install tree-sitter-cli` |
 | C コンパイラ | 同上 | Visual Studio Build Tools（MSVC） | `sudo apt install build-essential` |
@@ -17,9 +17,32 @@ Windows / Linux 用の Neovim 個人設定。プラグイン管理は [lazy.nvim
 | basedpyright, ruff | Python の LSP | `uv tool install basedpyright` / `uv tool install ruff` | 同左（`~/.local/bin` を PATH に通す） |
 | rust-analyzer, clippy | Rust の LSP | `rustup component add rust-analyzer clippy` | 同左（`~/.cargo/bin` を PATH に通す） |
 
-※ ディストリのパッケージ（`apt install neovim` など）は 0.12 より古いことが多い。`nvim --version` で確認する。
-
 LSP サーバーは mason で自動インストールしないので、上記のように入れて PATH を通しておく。
+
+### Linux に Neovim をインストールする
+
+ディストリのパッケージ（`apt install neovim` など）は 0.12 より古いことが多い（Ubuntu 24.04 は 0.9.5）。WSL や EC2 でも、公式のビルド済み tarball を `/opt` に展開して使う。
+
+```sh
+# apt で入れた古い nvim があれば削除する
+sudo apt remove neovim
+
+# x86_64 なら nvim-linux-x86_64、ARM（aarch64、EC2 の Graviton など）なら nvim-linux-arm64
+arch=$(uname -m | sed 's/aarch64/arm64/')
+curl -LO "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${arch}.tar.gz"
+sudo rm -rf "/opt/nvim-linux-${arch}"
+sudo tar -C /opt -xzf "nvim-linux-${arch}.tar.gz"
+rm "nvim-linux-${arch}.tar.gz"
+
+# PATH に追加する（zsh なら ~/.zshrc）
+echo "export PATH=\"/opt/nvim-linux-${arch}/bin:\$PATH\"" >> ~/.bashrc
+source ~/.bashrc
+hash -r
+
+nvim --version
+```
+
+更新するときは、PATH の追加以外の手順をもう一度実行する。公式の tarball は新しめの glibc を前提にしているため、Amazon Linux 2 のような古いディストリでは動かないことがある。
 
 ## セットアップ
 
