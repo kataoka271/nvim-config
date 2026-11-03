@@ -1,28 +1,43 @@
 # nvim-config
 
-Windows 用の Neovim 個人設定。プラグイン管理は [lazy.nvim](https://github.com/folke/lazy.nvim)。
+Windows / Linux 用の Neovim 個人設定。プラグイン管理は [lazy.nvim](https://github.com/folke/lazy.nvim)。
 
 ## 必要なもの
 
-| ツール | 用途 | インストール例 |
-|---|---|---|
-| Neovim 0.12 以上 | nvim-treesitter（main ブランチ）の要件 | `winget install Neovim.Neovim` |
-| git | lazy.nvim とプラグインの取得 | `winget install Git.Git` |
-| tree-sitter-cli | Tree-sitter パーサーのビルド | `npm install -g tree-sitter-cli` |
-| C コンパイラ | 同上（MSVC など） | Visual Studio Build Tools |
-| ripgrep | snacks.nvim の grep 検索 | `winget install BurntSushi.ripgrep.MSVC` |
-| Nerd Font | アイコン表示（ターミナル側で設定） | |
-| basedpyright, ruff | Python の LSP | `uv tool install basedpyright` / `uv tool install ruff` |
-| rust-analyzer, clippy | Rust の LSP | `rustup component add rust-analyzer clippy` |
+| ツール | 用途 | Windows | Linux（Debian / Ubuntu の例） |
+|---|---|---|---|
+| Neovim 0.12 以上 | nvim-treesitter（main ブランチ）の要件 | `winget install Neovim.Neovim` | 公式の AppImage / tarball など（※） |
+| git | lazy.nvim とプラグインの取得 | `winget install Git.Git` | `sudo apt install git` |
+| tree-sitter-cli | Tree-sitter パーサーのビルド | `npm install -g tree-sitter-cli` | `npm install -g tree-sitter-cli` または `cargo install tree-sitter-cli` |
+| C コンパイラ | 同上 | Visual Studio Build Tools（MSVC） | `sudo apt install build-essential` |
+| curl, tar | パーサーのソース・blink.cmp のバイナリの取得 | Windows 10 以降に同梱 | `sudo apt install curl tar` |
+| ripgrep | snacks.nvim の grep 検索 | `winget install BurntSushi.ripgrep.MSVC` | `sudo apt install ripgrep` |
+| クリップボード連携 | `clipboard=unnamedplus` | 不要 | Wayland: `wl-clipboard` / X11: `xclip`（SSH 越しは OSC 52 対応ターミナルなら不要） |
+| Nerd Font | アイコン表示（ターミナル側で設定） | | |
+| basedpyright, ruff | Python の LSP | `uv tool install basedpyright` / `uv tool install ruff` | 同左（`~/.local/bin` を PATH に通す） |
+| rust-analyzer, clippy | Rust の LSP | `rustup component add rust-analyzer clippy` | 同左（`~/.cargo/bin` を PATH に通す） |
+
+※ ディストリのパッケージ（`apt install neovim` など）は 0.12 より古いことが多い。`nvim --version` で確認する。
 
 LSP サーバーは mason で自動インストールしないので、上記のように入れて PATH を通しておく。
 
 ## セットアップ
 
+Windows（PowerShell）:
+
 ```powershell
 git clone https://github.com/kataoka271/nvim-config "$env:LOCALAPPDATA\nvim"
 nvim
 ```
+
+Linux:
+
+```sh
+git clone https://github.com/kataoka271/nvim-config "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+nvim
+```
+
+プラグインなどのデータは Windows では `%LOCALAPPDATA%\nvim-data`、Linux では `~/.local/share/nvim` に置かれる。
 
 初回起動時に lazy.nvim・プラグイン・Tree-sitter パーサーが自動でインストールされる。その後、プラグインのバージョンを `lazy-lock.json` に揃える。
 
@@ -31,6 +46,8 @@ nvim
 ```
 
 問題があれば `:checkhealth` で確認する。
+
+複数のマシンで使う場合、`:Lazy update` はどれか1台でだけ行って `lazy-lock.json` をコミットし、ほかのマシンでは `git pull` してから `:Lazy restore` する（各マシンで update するとロックファイルが衝突する）。
 
 ## 構成
 
